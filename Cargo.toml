@@ -1,0 +1,13 @@
+[package]
+name = "powder-toy-slt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+superlighttui = "0.6"
+rand = "0.8"
+crossterm = "0.28"
+
+[profile.release]
+opt-level = 3
+lto = true
