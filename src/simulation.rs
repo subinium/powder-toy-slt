@@ -571,9 +571,7 @@ impl Simulation {
                 if next_elem == Element::Fire || next_elem == Element::Plasma {
                     self.pressure[i] = (self.pressure[i] + 0.14).clamp(-1.0, 1.0);
                 }
-            }
-
-            if let Some(t) = element.ignite_temp() {
+            } else if let Some(t) = element.ignite_temp() {
                 if heat > t {
                     self.grid[i] = Some(Particle::new(Element::Fire));
                     self.pressure[i] = (self.pressure[i] + 0.1).clamp(-1.0, 1.0);
@@ -668,6 +666,9 @@ impl Simulation {
             if self.try_move(x, y, xi + d1, yi) || self.try_move(x, y, xi + d2, yi) {
                 return;
             }
+            if self.try_move(x, y, xi + d1, yi + 1) || self.try_move(x, y, xi + d2, yi + 1) {
+                return;
+            }
             if self.try_move(x, y, xi + d1, yi - 1) || self.try_move(x, y, xi + d2, yi - 1) {
                 return;
             }
@@ -693,6 +694,9 @@ impl Simulation {
 
         if g == 0 {
             if self.try_move(x, y, xi + d1, yi) || self.try_move(x, y, xi + d2, yi) {
+                return;
+            }
+            if self.try_move(x, y, xi, yi + 1) || self.try_move(x, y, xi, yi - 1) {
                 return;
             }
             if self.try_move(x, y, xi, yi + v_bias_y) {
@@ -988,6 +992,7 @@ impl Simulation {
             return;
         }
 
+        let mut teleported = false;
         for _ in 0..5 {
             let nx = xi + rng.gen_range(-6..=6);
             let ny = yi + rng.gen_range(-4..=4);
@@ -1001,7 +1006,13 @@ impl Simulation {
                     p.moved = true;
                 }
                 self.pressure[nidx] = (self.pressure[nidx] + 0.05).clamp(-1.0, 1.0);
+                teleported = true;
                 break;
+            }
+        }
+        if !teleported {
+            if let Some(p) = &mut self.grid[idx] {
+                p.moved = true;
             }
         }
     }
@@ -2155,7 +2166,11 @@ impl Simulation {
                     Element::Void => {
                         for &(nx, ny) in &neighbors {
                             if let Some(ne) = self.element_at(nx, ny) {
-                                if !ne.is_special() {
+                                if !ne.is_special()
+                                    && ne != Element::Wall
+                                    && ne != Element::Void
+                                    && ne != Element::Dmnd
+                                {
                                     changes.push((nx as usize, ny as usize, None));
                                 }
                             }
