@@ -4,8 +4,7 @@ A falling-sand physics simulator inspired by [The Powder Toy](https://powdertoy.
 
 No GPU. No window manager. No SDL. Just your terminal.
 
-<!-- Replace with your recorded GIF -->
-<!-- ![demo](demo.gif) -->
+![demo](demo.gif)
 
 ```
 cargo run --release
